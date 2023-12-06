@@ -1,68 +1,20 @@
-const express = require('express')
-const router= express()
+const express = require("express")
+const router = express()
 
 const connection = require("../connection")
+const { json } = require("body-parser")
 
-    router.get('/framework',(req,res)=>{
-        console.log(req)
-        connection.query('select * from framework', (error,results,fields)=>{
-            if (error){console.log(" error "+error); }
-                
-        
-            else{
-                console.log(results);
-                res.end(JSON.stringify(results))
-            }
-        })
-    })
+router.route("/projet")
+    .get((req,res)=>{  calcule("select * from framework",null,(result)=>{ res.json(result) }) })
+    .post((req,res)=>{calcule("insert into framework (name,version,info) values (?,?,?)",[req.body],(result)=>{ res.json(result)  })   })
+    .put((req,res)=>{ calcule("update framework set name=?, version=?, info=? where name=?",[req.body],(result)=>{ res.json(result) }) })
+    .delete((req,res)=>{ calcule("delete from framework where name=? ",[req.params.name],(result)=>{ res.json(result) })  })
+    .get((req,res)=>{ calcule("select * from framework where name=?"[req.params.name],(result)=>{res.json(result)})})
 
-    router.post('/ajoutFramework', function(req,res){
-
-        console.log(req.body.id)
-        connection.query('insert into framework (nom,version,info) values (?,?,?)',[req.body.nom,req.body.version,req.body.info],(error,results,fields)=>{
-
-            if(error){
-                console.log(error)
-                res.json({valeur:false})
-            }
-            else{
-                console.log(results)
-                res.json({valeur:true})
-
-            }
-        })
-    })
-    /**
-     * updating La class Framework
-     * 
-     */
-    router.put('/updateFramework',function(req,res){
-
-        connection.query('update framework set nom=?,version=?, info=? ',[req.body.nom,req.body.version,req.body.info],(error,results,fields)=>{
-
-            if(error){
-                console.log(error)
-                res.end(JSON.stringify({valeur:false}))
-            }
-            else{
-                console.log(results)
-                res.end(JSON.stringify({valeur:true}))
-            }
-        })
-    })
-
-    router.delete('/deleteFramework',function(req,res){
-        console.log(req.body.id)
-        connection.query('delete from framework where nom=?',[req.body.id], (error,results,fields)=>{
-            if(error){
-                console.log(error)
-                res.end(JSON.stringify({valeur:false}))
-            }
-            else{
-                console.log(results)
-                res.end(JSON.stringify({valeur:true}))
-            }
-        })
-    })
+function calcule(a,param,callBack){
+     if(!param){ connection.query(a,(resultat,error)=>{error?callBack({result:false}):callBack({result:resultat}) })      }
+     else if(param.method=="POST" || param.method=="PUT"){ connection.query(a,[param.name,param.version,param.info,param.name],(resultat,error)=>{ error?callBack({result:false}):callBack({result:true}) })  }
+     else if(!param.method){  connection.query(a,[param.name],(result,error)=>{error?callBack({result:false}):callBack({result:true}) })  }
+}
 module.exports =router;
 
