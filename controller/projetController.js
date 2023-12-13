@@ -14,5 +14,6 @@ router.route("/projet")
 function calcule(a,param,callBack){
      if(!param){ connection.query(a,(resultat,error)=>{error?callBack({result:false}):callBack({result:resultat}) })      }
      else if(param.method=="POST" || param.method=="PUT"){ connection.query(a,[param.title,param.resume,param.link,param.id],(resultat,error)=>{ error?callBack({result:false}):callBack({result:true}) })  }
-     else if(!param.method || !param.method){  connection.query(a,[param.id],(result,error)=>{error?callBack({result:false}):callBack({result:true}) })  }
+     else if(!param.method){  connection.query(a,[param.id],(result,error)=>{error?callBack({result:false}):callBack({result:true}) })  }
 }
+module.exports=router
